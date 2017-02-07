@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="BK.css">
+		<title>Basked Kacz v2</title>
+		 
+		<script>
+		var DaneKoszyka = {};
+		var menuBG = {};
+		var ob = {};
+		var obx = {};
+		var Images = [];
+		var Fruits = [];
+		var Basket = {};
+		var BackGround = {};
+		var hiScores = {easy:0,medium:0,hard:0};
+		var map=0;
+		var bask=0;
+		var Points;
+		var time;
+		var Life=3;
+		var timeDiff=800;
+		var nTime=0;
+		var gameMode=0;
+		var difficulty=0;
+		var maps=['img/bg1.jpg','img/bg2.jpg','img/bg3.jpg'];
+		var baskets=['img/basket.png','img/basket2.png','img/basket3.png'];
+		var diff=['Easy','Medium','Hard'];
+		var mp=['Sunflowers','Flowers','Supermarket'];
+		var bsk=['B1','B2','B3'];
+		
+	
+		function countdown()
+				{
+		
+					var today = new Date();
+
+					var hour= today.getHours();
+					if(hour<10) hour="0"+hour;
+					var minute= today. getMinutes();
+					if(minute<10) minute="0"+minute;
+					var second= today. getSeconds();
+					if(second<10) second="0"+second;
+	
+	
+					document.getElementById("clock").innerHTML= hour+":"+minute+":"+second; 
+					setTimeout("countdown()",1000)
+				}
+	
+		
+	
+		window.onload=function()
+		{
+			ob=document.getElementById("Canvas");
+			obx = ob.getContext("2d");
+			DefKoszyka();
+			countdown();
+			getHiScores();
+			time=new Date().getTime();
+			obx.font="bold 15px Georgia";
+			obx.fillStyle="#EEEEEE";
+			ob.addEventListener('mousemove',obslCan,false);
+			ob.addEventListener('click',clickOnCanvas,false);
+			document.addEventListener('keydown',isKeyPressed,false);
+			LoadImages();
+			obx.drawImage(Images[0],10,10);
+			gameType();
+		}
+		
+		function gameType(){
+			if(gameMode==0)
+			{
+				ob.id="Canvas2";
+				menu();
+				return;
+			}
+			if(gameMode==1)
+			{
+				ob.id="Canvas";
+				BackGround=new Image();
+				BackGround.src = maps[map];
+				Basket = new Image();
+				Basket.src=baskets[bask];
+				draw();
+				return;
+			}
+			if(gameMode==2)
+			{
+				settings();
+				return;
+			}
+			if(gameMode==3)
+			{
+				showHiScores();
+				return;
+			}
+			if(gameMode==4)
+			{
+				HowToPlay();
+				return;
+			}
+			
+		}
+		
+		function getHiScores()
+		{
+			if(!(localStorage.getItem("easy")=== null))
+			{
+				hiScores.easy=localStorage.getItem("easy")*1;
+			}
+			if(!(localStorage.getItem("medium")=== null))
+			{
+				hiScores.medium=localStorage.getItem("medium")*1;
+			}
+			if(!(localStorage.getItem("hard")=== null))
+			{
+				hiScores.hard=localStorage.getItem("hard")*1;
+			}
+		}
+		
+		function updateHiScores()
+		{
+			if(hiScores.easy>(localStorage.getItem("easy")*1))localStorage.setItem("easy",hiScores.easy);
+			if(hiScores.medium>(localStorage.getItem("medium")*1))localStorage.setItem("medium",hiScores.medium);
+			if(hiScores.hard>(localStorage.getItem("hard")*1))localStorage.setItem("hard",hiScores.hard);
+		}
+		
+		function showHiScores()
+		{
+			var tmp=obx.font;
+			var tmp2=obx.fillStyle;
+			
+			obx.fillStyle = "rgb(230,200,200)";
+			obx.rect( 0 , 0 , ob.width, ob.height );
+			obx.fill();
+			
+			obx.font = "bold 60px Arial";
+			obx.fillStyle = "#FB1128";
+			obx.shadowColor = "rgb(190, 190, 190)";
+			obx.shadowOffsetX = 10;
+			obx.shadowOffsetY = 10;
+			obx.fillText("CURRENT HI-SCORES",50,120);
+			obx.shadowColor = "transparent";
+			obx.font="bold 30px Georgia";
+			obx.fillStyle = "black";
+			obx.fillText("Difficulty easy:",100,300);
+			obx.fillText("Difficulty medium:",100,425);
+			obx.fillText("Difficulty hard:",100,550);
+			obx.fillText(hiScores.easy,550,300);
+			obx.fillText(hiScores.medium,550,425);
+			obx.fillText(hiScores.hard,550,550);
+			
+			obx.font=tmp;
+			obx.fillStyle=tmp2;
+			if(DaneKoszyka.key==27)
+			{
+				gameMode=0;
+				resetingPressed();
+				window.requestAnimationFrame(gameType);
+				return;
+			}
+			resetingPressed();
+			window.requestAnimationFrame(gameType);
+		}
+		
+		function setHiScores()
+		{
+			switch(difficulty)
+			{
+				case 0:
+				{
+					if(Points>hiScores.easy)hiScores.easy=Points;
+					break;
+				}
+				case 1:
+				{
+					if(Points>hiScores.medium)hiScores.medium=Points;
+					break;
+				}
+				case 2:
+				{
+					if(Points>hiScores.hard)hiScores.hard=Points;
+					break;
+				}
+			}
+			updateHiScores();
+		}
+		
+		function HowToPlay()
+		{
+			var tmp=obx.font;
+			var tmp2=obx.fillStyle;
+			obx.fillStyle = "rgb(230,200,200)";
+			obx.rect( 0 , 0 , ob.width, ob.height );
+			obx.fill();
+			
+	
+			obx.font = "bold 80px Arial";
+			obx.fillStyle = "#FB1128";
+			obx.shadowColor = "rgb(190, 190, 190)";
+			obx.shadowOffsetX = 10;
+			obx.shadowOffsetY = 10;
+			obx.fillText("Instructions",140,120);
+			
+			obx.shadowColor = "transparent";
+			obx.font="bold 20px Georgia";
+			obx.fillStyle = "black";
+		
+			obx.fillText("In settings, you can choose map, basket",140,220);
+			obx.fillText("and difficulty level. Back to menu by",140,260);
+			obx.fillText("pressing [Esc] and start the adventure. ",140,300);
+			obx.fillText("Catch as many fruits as you can and don't  ",140,340);
+			obx.fillText("let them fall beside basket, because ",140,380);
+			obx.fillText("you've only 3 lifes. Control your basket  ",140,420);
+			obx.fillText("by mouse.In any time you can stop game",140,460);
+			obx.fillText("by pressing [Space]. ",140,500);
+			
+			//HappyFace
+			
+			obx.beginPath();
+			obx.lineWidth = 5;
+			obx.strokeStyle = '#ED0634';
+			obx.arc(220,630,80,0,Math.PI*2);
+			obx.moveTo(265,630);
+			obx.arc(220,630,45,0,Math.PI);  
+			obx.moveTo(210,605);
+			obx.arc(200,605,10,0,Math.PI*2);
+			obx.moveTo(250,605);
+			obx.arc(240,605,10,0,Math.PI*2);  
+			obx.stroke();
+			
+			
+			obx.font="bold 30px Georgia";
+			obx.fillStyle = "#FB1128";
+			obx.shadowColor = "rgb(190, 190, 190)";
+			obx.shadowOffsetX = 10;
+			obx.shadowOffsetY = 10;
+			obx.fillText("Good luck!",400,600);
+			obx.shadowColor = "transparent";
+			obx.font="bold 15px Georgia";
+			obx.font=tmp;
+			obx.fillStyle=tmp2;
+		
+			if(DaneKoszyka.key==27)
+			{
+				gameMode=0;
+				resetingPressed();
+				window.requestAnimationFrame(gameType);
+				return;
+			}
+			resetingPressed();
+			window.requestAnimationFrame(gameType);
+		}
+		
+		function settings()
+		{
+			obx.fillStyle = "rgb(230,200,200)";
+			obx.rect( 0 , 0 , ob.width, ob.height );
+			obx.fill();
+			
+			
+			if((DaneKoszyka.x>199)&&(DaneKoszyka.x<401))
+			{	
+				if((DaneKoszyka.y>249)&&(DaneKoszyka.y<301))
+				{
+					drawButton(200,250,200,50,'  CHANGE MAP',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						map=(map+1)%maps.length;
+					}
+				}
+				else
+					drawButton(200,250,200,50,'  CHANGE MAP',"rgb(230,200,200)");
+				if((DaneKoszyka.y>349)&&(DaneKoszyka.y<401))
+				{
+					drawButton(200,350,200,50,'CHANGE BASKET',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						bask=(bask+1)%baskets.length;
+					}
+				}
+				else
+					drawButton(200,350,200,50,'CHANGE BASKET',"rgb(230,200,200)");
+				if((DaneKoszyka.y>449)&&(DaneKoszyka.y<501))
+				{
+					drawButton(200,450,200,50,'CHANGE DIFFICULTY',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						difficulty=(difficulty+1)%3;
+					}
+				}
+				else
+					drawButton(200,450,200,50,'CHANGE DIFFICULTY',"rgb(230,200,200)");
+			}
+			else
+			{
+				drawButton(200,250,200,50,'  CHANGE MAP',"rgb(230,200,200)");
+				drawButton(200,350,200,50,'CHANGE BASKET',"rgb(230,200,200)");
+				drawButton(200,450,200,50,'CHANGE DIFFICULTY',"rgb(230,200,200)");
+			}
+			obx.fillStyle = "black";
+			obx.fillText(mp[map],500,280);
+			obx.fillText(bsk[bask],500,380);
+			obx.fillText(diff[difficulty],500,480);
+			if(DaneKoszyka.key==27)
+			{
+				gameMode=0;
+				window.requestAnimationFrame(gameType);
+				return;
+			}
+			resetingPressed();
+			window.requestAnimationFrame(gameType);
+		}
+		
+		function menu()
+		{
+			obx.drawImage(menuBG,0,0);
+			
+			var temp=obx.font;
+			obx.font="bold 30px Georgia";
+			if((DaneKoszyka.x>299)&&(DaneKoszyka.x<501))
+			{	
+				if((DaneKoszyka.y>249)&&(DaneKoszyka.y<301))
+				{
+					drawButton(300,250,200,50,'NEW GAME',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						gameMode=1;
+						DefKoszyka();
+					}
+				}
+				else
+					drawButton(300,250,200,50,'NEW GAME',"rgb(230,200,200)");
+				if((DaneKoszyka.y>349)&&(DaneKoszyka.y<401))
+				{
+					drawButton(300,350,200,50,' SETTINGS',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						gameMode=2;
+					}
+				}
+				else
+					drawButton(300,350,200,50,' SETTINGS',"rgb(230,200,200)");
+				if((DaneKoszyka.y>449)&&(DaneKoszyka.y<501))
+				{
+					drawButton(300,450,200,50,'HI-SCORES',"rgb(200,30,30)");
+					if(DaneKoszyka.click)
+					{
+						gameMode=3;
+					}
+				}
+				else
+					drawButton(300,450,200,50,'HI-SCORES',"rgb(230,200,200)");
+					
+				if((DaneKoszyka.y>549)&&(DaneKoszyka.y<601))
+				{
+					drawButton(280,550,265,50,'INSTRUCTIONS',"rgb(230,30,30)");
+					if(DaneKoszyka.click)
+					{
+						gameMode=4;
+					}
+				}
+				else
+					drawButton(280,550,265,50,'INSTRUCTIONS',"rgb(230,200,200)");	
+				
+			}
+			else
+			{
+				drawButton(300,250,200,50,'NEW GAME',"rgb(230,200,200)");
+				drawButton(300,350,200,50,' SETTINGS',"rgb(230,200,200)");
+				drawButton(300,450,200,50,'HI-SCORES',"rgb(230,200,200)");
+				drawButton(280,550,265,50,'INSTRUCTIONS',"rgb(230,200,200)");
+			}
+			obx.font=temp;
+			resetingPressed();
+			window.requestAnimationFrame(gameType);
+		}
+		
+		function drawButton(x, y, width, height, text, color)
+		{
+			var temp=obx.fillStyle;
+			obx.fillStyle = color;
+			obx.beginPath();
+			obx.rect(x,y,width,height);
+			obx.closePath();
+			obx.fill();
+			obx.fillStyle = "black";
+			obx.fillText(text,x+5,y+2/3*height);
+			obx.fillStyle=temp;
+		}
+
+		function LoadImages()
+		{
+			var imageList = ['img/apple.png','img/pear.png','img/cherry.png','img/orange.png','img/plum.png','img/Strawberry.png','img/watermelon.png'];
+			for(var i=0;i<imageList.length;i++)
+			{
+				Images.push(new Image());
+				Images[i].src=imageList[i];
+			}
+			menuBG=new Image();
+			menuBG.src='img/menu.jpg';
+		}	
+		
+		function DefKoszyka()
+		{
+			DaneKoszyka.x=250;
+			DaneKoszyka.y=ob.height-100;
+			Points = 0;
+			time=new Date().getTime();
+			Life=3;
+			DaneKoszyka.click=0;
+		}
+		
+		function obslCan(e)
+		{
+			DaneKoszyka.x=e.pageX-ob.offsetLeft;
+			DaneKoszyka.y=e.pageY-ob.offsetTop;
+		}
+		
+		function clickOnCanvas(e)
+		{
+			DaneKoszyka.click=1;
+		}
+		
+		function isKeyPressed(e)
+		{
+			DaneKoszyka.key = e.which || e.keyCode;
+		}
+		
+		function resetingPressed()
+		{
+			DaneKoszyka.key= 0;
+			DaneKoszyka.click=0;
+		}
+		
+		function fallingFruits()
+		{
+			var newTime=new Date().getTime();
+			if((newTime-time)>(timeDiff-(difficulty*250)))
+			{
+				time=newTime;
+				makeNewFruits();
+			}
+			Fruits.forEach(goingDown);
+		}
+		
+		function makeNewFruits()
+		{
+			Fruits.push(new fruit());
+		}
+		
+		function fruit()
+		{
+			this.x=Math.floor(Math.random()*(ob.width-50));
+			this.y=0;
+			this.fruitType=Math.floor(Math.random()*Images.length);
+		}
+		
+		function goingDown(element, indexVal, arrayName)
+		{
+			arrayName[indexVal].y+=10;
+			obx.drawImage(Images[arrayName[indexVal].fruitType],arrayName[indexVal].x,arrayName[indexVal].y);
+			var x=arrayName[indexVal].x,y=arrayName[indexVal].y;
+			if((y<(ob.height-100))&&(y>(ob.height-150))&&(x>(DaneKoszyka.x-120))&&(x<(DaneKoszyka.x+70)))
+			{
+				Points+=1;
+				delete arrayName[indexVal];
+			}
+			if(y>ob.height)
+			{
+				Life-=1;
+				delete arrayName[indexVal];
+			}
+		}
+		
+		function showPoints()
+		{
+			var tmp=obx.font;
+			obx.fillStyle = "black";
+			obx.font="bold 15px Georgia"; 
+			obx.fillText("Your points: "+Points,600,20);
+			obx.fillText("Your lifes: "+Life,10,20);
+			obx.font=tmp;
+		}
+		
+		function endGame()
+		{
+			var tmp=obx.font;
+			Fruits=[]
+			obx.font="bold 30px Georgia";
+			obx.fillText("GAME OVER!",290,400);
+			obx.fillText("Press ESC to return to main menu",110,460);
+			obx.font=tmp;
+			if(DaneKoszyka.key==27)
+			{
+				setHiScores();
+				window.requestAnimationFrame(gameType);
+				return;
+			}
+			else
+			{
+				resetingPressed();
+				window.requestAnimationFrame(endGame);
+			}
+		}
+		
+		function pause()
+		{
+			var tmp=obx.font;
+			if(!nTime)
+				nTime=new Date().getTime()-time;
+			obx.font="bold 30px Georgia"; 
+			obx.fillText("PRESS SPACE TO CONTINUE",160,400);
+			obx.font=tmp;
+			if(DaneKoszyka.key==32)
+			{
+				resetingPressed();
+				window.requestAnimationFrame(draw);
+				time=new Date().getTime()-nTime;
+				nTime=0;
+				return;
+			}
+			resetingPressed();
+			window.requestAnimationFrame(pause);
+		}
+		
+		function draw()
+		{
+			obx.clearRect( 0 , 0 , ob.width, ob.height );
+			obx.drawImage(BackGround,0,0);
+			obx.drawImage(Basket,DaneKoszyka.x-100,(ob.height-100));
+			fallingFruits();
+			showPoints();
+			if(DaneKoszyka.key==27)
+			{
+				resetingPressed();
+				gameMode=0;
+				Fruits=[];
+				setHiScores();
+				window.requestAnimationFrame(gameType);
+				return;
+			}
+			if(DaneKoszyka.key==32)
+			{
+				resetingPressed();
+				window.requestAnimationFrame(pause);
+				return;
+			}
+			if(Life>0)
+			{
+				resetingPressed();
+				window.requestAnimationFrame(draw);
+			}
+			else
+			{
+				resetingPressed();
+				gameMode=0;
+				Fruits=[]
+				endGame();
+				return;
+			}
+		}
+		</script>
+	</head>
+	<body>
+		<div>
+		<a href="BK.html"><img src="img/logo.png" alt="logo"></img></a>
+		</div>
+		
+		<span style="position:static; font-style: italic; font-weight: bold; font-size: 350%;"><div id="clock"></div></span>
+		
+		<canvas id="Canvas" width="750px" height="800px">Hehe, biedak bez obsługi canvasu!</canvas>
+		
+	</body>
+</html>

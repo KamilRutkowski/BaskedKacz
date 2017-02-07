@@ -1,0 +1,25 @@
+body {
+	text-align:center;
+	background-color:rgb(204,229,255);
+}
+
+#Canvas,#Canvas2 {
+	border: solid 5px rgb(150,50,50);
+	background-color:rgb(255,255,255);
+}
+div img{
+margin:auto;
+
+}
+h1 {
+	font-style:italic;
+	color:rgb(20,60,20);
+}
+
+#Canvas:hover {
+	cursor:none;
+}
+
+#Canvas2:hover {
+	cursor:default;
+}
